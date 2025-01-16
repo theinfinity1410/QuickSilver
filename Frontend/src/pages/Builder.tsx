@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { StepsList } from '../components/StepsList';
 import { FileExplorer } from '../components/FileExplorer';
 import { TabView } from '../components/TabView';
@@ -10,20 +10,24 @@ import axios from 'axios';
 import { BACKEND_URL } from '../config';
 import { parseXml } from '../steps';
 import { useWebContainer } from '../hooks/useWebContainer';
-import { FileNode } from '@webcontainer/api';
 import { Loader } from '../components/Loader';
 
-const MOCK_FILE_CONTENT = `// This is a sample file content
-import React from 'react';
-
-function Component() {
-  return <div>Hello World</div>;
+interface TemplateResponse {
+  prompts: string[];
+  uiPrompts: string[];
 }
 
-export default Component;`;
+interface StepsResponse {
+  response: string;
+  data : string;
+}
+
+
+
 
 export function Builder() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { prompt } = location.state as { prompt: string };
   const [userPrompt, setPrompt] = useState("");
   const [llmMessages, setLlmMessages] = useState<{role: "user" | "assistant", content: string;}[]>([]);
@@ -38,6 +42,13 @@ export function Builder() {
   const [steps, setSteps] = useState<Step[]>([]);
 
   const [files, setFiles] = useState<FileItem[]>([]);
+
+  useEffect(() => {
+    // Redirect to home if not authenticated
+    if (!localStorage.getItem('token')) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   useEffect(() => {
     let originalFiles = [...files];
@@ -151,7 +162,7 @@ export function Builder() {
   }, [files, webcontainer]);
 
   async function init() {
-    const response = await axios.post(`${BACKEND_URL}/template`, {
+    const response = await axios.post<TemplateResponse>(`${BACKEND_URL}/template`, {
       prompt: prompt.trim()
     });
     setTemplateSet(true);
@@ -164,7 +175,7 @@ export function Builder() {
     })));
 
     setLoading(true);
-    const stepsResponse = await axios.post(`${BACKEND_URL}/chat`, {
+    const stepsResponse = await axios.post<StepsResponse>(`${BACKEND_URL}/chat`, {
       messages: [...prompts, prompt].map(content => ({
         role: "user",
         content
@@ -223,7 +234,7 @@ export function Builder() {
                     };
 
                     setLoading(true);
-                    const stepsResponse = await axios.post(`${BACKEND_URL}/chat`, {
+                    const stepsResponse = await axios.post<StepsResponse>(`${BACKEND_URL}/chat`, {
                       messages: [...llmMessages, newMessage]
                     });
                     setLoading(false);
@@ -254,11 +265,16 @@ export function Builder() {
           <div className="col-span-2 bg-gray-900 rounded-lg shadow-lg p-4 h-[calc(100vh-8rem)]">
             <TabView activeTab={activeTab} onTabChange={setActiveTab} />
             <div className="h-[calc(100%-4rem)]">
-              {activeTab === 'code' ? (
-                <CodeEditor file={selectedFile} />
-              ) : (
-                <PreviewFrame webContainer={webcontainer} files={files} />
-              )}
+            {activeTab === 'code' ? (
+  <CodeEditor file={selectedFile} />
+) : (
+  webcontainer ? (
+    <PreviewFrame webContainer={webcontainer} files={files} />
+  ) : (
+    <Loader /> // Fallback while `webcontainer` initializes
+  )
+)}
+
             </div>
           </div>
         </div>
