@@ -7,7 +7,7 @@ const Signup: React.FC = () => {
 
   const handleSignup = async () => {
     try {
-      const res = await axios.post('/auth/signup', { email, password });
+      const res = await axios.post<{ token: string }>('/auth/signup', { email, password });
       localStorage.setItem('token', res.data.token);
       window.location.href = '/generate';
     } catch (error) {

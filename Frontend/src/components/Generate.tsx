@@ -13,7 +13,7 @@ const Generate: React.FC = () => {
   const generateWebsite = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('/generate', {}, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.post<{ message: string }>('/generate', {}, { headers: { Authorization: `Bearer ${token}` } });
       alert(res.data.message);
     } catch (error) {
       alert('Failed to generate website');
