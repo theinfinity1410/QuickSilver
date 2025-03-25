@@ -24,7 +24,7 @@ cd QuickSilver
 1. Navigate to the backend directory:
 
    ```bash
-   cd Backend
+   cd server
    ```
 
 2. Install the required dependencies:
@@ -36,7 +36,7 @@ cd QuickSilver
 3. Start the backend server:
 
    ```bash
-   npm start
+   npm run dev
    ```
 
 ### Frontend Setup
@@ -44,7 +44,7 @@ cd QuickSilver
 1. Open a new terminal and navigate to the frontend directory:
 
    ```bash
-   cd Frontend
+   cd client
    ```
 
 2. Install the required dependencies:
@@ -56,12 +56,12 @@ cd QuickSilver
 3. Start the frontend application:
 
    ```bash
-   npm start
+   npm run dev
    ```
 
 ### Access the Application
 
-- Open your web browser and navigate to `http://localhost:3000` to interact with QuickSilver.
+- Open your web browser and navigate to `http://localhost:5173` to interact with QuickSilver.
 
 ## Usage
 
